@@ -95,12 +95,11 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	"""
 	correct = 0
 	total = 0
-	all_pred = []
-	all_true = []
 	model.eval()
+	print('[INFO] Validating Model')
 	with torch.no_grad():
 		val_loader = DataLoader(valset, sampler=None, num_workers=4,
-								shuffle=False, batch_size=1,
+								shuffle=False, batch_size=256,
 								pin_memory=True, collate_fn=torch.utils.data.dataloader.default_collate)
 
 		val_loss = 0.0
@@ -114,15 +113,13 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 			total += y.size(0)
 			correct += (predicted == y).sum().item()
 
-			all_pred.extend([predicted])
-			all_true.extend([y])
+			# print("[INFO] Top-1 Acc by batch {}".format(100*correct/total))
 
 		val_loss = val_loss / (i + 1)
 	
 	val_log_path = os.path.join(checkpoint_path,'log_validate.txt')
 	with open(val_log_path, 'a') as f:
 		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
-		f.write(confusion_matrix(all_true, all_pred))
 	print("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
 	
 	model.train()
@@ -210,6 +207,7 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 	
 	# resume training
 	start_epochs, iterations = load_checkpoint(checkpoint_filepath, model, optimizer)
+	just_load = 1 # variable prevent load and then save immediately
 	
 	# get scheduler
 	scheduler = get_scheduler(optimizer, train_config, iterations)
@@ -261,10 +259,12 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 				save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
 			
 			iterations += 1
+			just_load = 0 # at get at least one update
 			
 		
 		# save at the end of epoch
-		save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
+		if just_load == 0:
+			save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
 			
 		# validating
 		validate(model, criterion, valset, epoch, train_config['checkpoint_path'], batch_to_gpu)
