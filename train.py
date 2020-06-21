@@ -92,6 +92,8 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	6. batch_to_gpu (fn): helper function for moving data to gpu
 
 	"""
+	correct = 0
+	total = 0
 	model.eval()
 	with torch.no_grad():
 		val_loader = DataLoader(valset, sampler=None, num_workers=0,
@@ -105,12 +107,16 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 			loss = criterion(y_pred, y)
 			val_loss += loss.item()
 
+			_, predicted = torch.max(y_pred.data, 1)
+			total += y.size(0)
+			correct += (predicted == y).sum().item()
+
 		val_loss = val_loss / (i + 1)
 	
 	val_log_path = os.path.join(checkpoint_path,'log_validate.txt')
 	with open(val_log_path, 'a') as f:
-		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f}\n".format(datetime.now(),epochs, val_loss))
-	print("[INFO] Validation loss {}: {:9f}  ".format(epochs, val_loss))
+		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
+	print("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
 	
 	model.train()
 
