@@ -222,9 +222,9 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 		for i, batch in enumerate(train_loader, iterations):
 			
 			# for resume training
-			if iterations*train_config['batch_size'] > len(train_loader):
+			if iterations > len(train_loader):
 				break
-			elif iterations != 0 and iterations*train_config['batch_size'] != i:
+			elif iterations != 0 and iterations != i:
 				continue 
 			
 			iter_start_time = time.perf_counter()
