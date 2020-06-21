@@ -66,10 +66,13 @@ def batch_to_gpu(batch):
 
 if __name__ == '__main__':
 
+	np.random.seed(0)
 	data = load_datapath_from_csv('D:\\ShoppeeChallenge_1_data','train.csv')
-	training_idx = np.random.choice(np.arange(data.shape[0]), size=int(data.shape[0]*0.975), replace=False)
+	training_idx = np.random.choice(np.arange(data.shape[0]), size=int(data.shape[0]*0.95), replace=False)
 	training_data = data[training_idx]
-	validating_data = data[-training_idx]
+	validating_data = np.array([d for i, d in enumerate(data) if i not in training_idx])
+	print(sum([1 if i in training_data else 0 for i in validating_data]))
+	print(data.shape[0])
 	print(training_data.shape)
 	print(validating_data.shape)
 	pd.DataFrame(training_data, columns=['image','class']).to_csv(os.path.join('D:\\ShoppeeChallenge_1_data','train_train.csv'), index=None)
