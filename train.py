@@ -213,12 +213,15 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 	scheduler = get_scheduler(optimizer, train_config, iterations)
 	lr = scheduler.get_last_lr()
 
+
 	# train
 	for epoch in range(start_epochs, train_config['epochs']):
 
 		# used to calculate avg loss over epoch
 		train_epoch_avg_loss = 0.0
-		
+		avg_acc = 0.0
+		correct = 0
+		total = 0
 		for i, batch in enumerate(train_loader, iterations):
 			
 			# for resume training
@@ -251,9 +254,16 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 			
 			iter_stop_time = time.perf_counter()
 			iter_time = iter_stop_time - iter_start_time
+
+			# validate on training set
+			_, predicted = torch.max(y_pred.data, 1)
+			total += y.size(0)
+			correct += (predicted == y).sum().item()
+			acc = correct/total
+			avg_acc += acc
 			
-			print('[INFO] {:1f}s, epoch: {}, train step: {}, loss: {:5f}, lr: {:5f}, datetime: {}'.format(
-					iter_time, epoch, i, loss.item(), optimizer.param_groups[-1]['lr'], datetime.now().strftime("%H:%M:%S")))
+			print('[{}] {:1f}s, epoch: {}, step: {}, loss: {:5f}, lr: {:5f}, Top-1 Acc: {:3f}'.format(
+					datetime.now().strftime("%H:%M:%S"), iter_time, epoch, i, loss.item(), optimizer.param_groups[-1]['lr'], acc*100))
 			
 			if iterations%train_config['iterations_per_checkpoint'] == train_config['iterations_per_checkpoint']-1:
 				save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
@@ -272,7 +282,8 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 		if scheduler is not None:
 			lr = scheduler.get_last_lr()
 			scheduler.step()
-				
+		
+		summary_writer.add_scalar('Acc/train_epoch', avg_acc*100/iterations, epoch * len(train_loader) + i) 
 		summary_writer.add_scalar('Loss/train_epoch', train_epoch_avg_loss/iterations, epoch * len(train_loader) + i) 
 		summary_writer.add_scalar('Learning Rate', optimizer.param_groups[-1]['lr'], epoch * len(train_loader) + i) 
 		iterations = 0
@@ -333,7 +344,9 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	
 	torch.cuda.set_device("cuda:{}".format(args.device))
-	print(torch.cuda.is_available())
+	print('GPU Enable: {}'.format(torch.cuda.is_available()))
+	if not torch.cuda.is_available():
+		raise ValueError('This code is implement to run on GPU only')
 	torch.backends.cudnn.benchmark = True
 	
 	main()
