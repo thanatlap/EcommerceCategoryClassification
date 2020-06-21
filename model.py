@@ -19,6 +19,7 @@ class Clf_model(nn.Module):
 		set_parameter_requires_grad(self.backbone, feature_extract)
 		num_ftrs = self.backbone.fc.in_features
 		self.backbone.fc = nn.Linear(num_ftrs, n_class)
+		torch.nn.init.xavier_uniform(self.backbone.fc.weight)
 
 	def forward(self, x):
 		x = self.backbone(x)

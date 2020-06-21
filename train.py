@@ -96,6 +96,8 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	correct = 0
 	total = 0
 	model.eval()
+	total_pred = []
+	total_actual = []
 	print('[INFO] Validating Model')
 	with torch.no_grad():
 		val_loader = DataLoader(valset, sampler=None, num_workers=4,
@@ -113,6 +115,9 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 			total += y.size(0)
 			correct += (predicted == y).sum().item()
 
+			total_pred.extend(predicted)
+			total_actual.extend(y)
+
 			# print("[INFO] Top-1 Acc by batch {}".format(100*correct/total))
 
 		val_loss = val_loss / (i + 1)
@@ -120,6 +125,7 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	val_log_path = os.path.join(checkpoint_path,'log_validate.txt')
 	with open(val_log_path, 'a') as f:
 		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
+		f.write(sklearn.metrics.confusion_matrix(total_actual, total_pred, labels=np.arange(42)))
 	print("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
 	
 	model.train()
