@@ -99,13 +99,13 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	all_true = []
 	model.eval()
 	with torch.no_grad():
-		val_loader = DataLoader(valset, sampler=None, num_workers=0,
+		val_loader = DataLoader(valset, sampler=None, num_workers=4,
 								shuffle=False, batch_size=1,
 								pin_memory=True, collate_fn=torch.utils.data.dataloader.default_collate)
 
 		val_loss = 0.0
 		for i, batch in enumerate(val_loader):
-			x, y, _ = batch_to_gpu(batch)
+			x, y = batch_to_gpu(batch)
 			y_pred = model(x)
 			loss = criterion(y_pred, y)
 			val_loss += loss.item()
@@ -224,9 +224,9 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 		for i, batch in enumerate(train_loader, iterations):
 			
 			# for resume training
-			if iterations > len(train_loader):
+			if iterations*train_config['batch_size'] > len(train_loader):
 				break
-			elif iterations != 0 and iterations != i:
+			elif iterations != 0 and iterations*train_config['batch_size'] != i:
 				continue 
 			
 			iter_start_time = time.perf_counter()
@@ -306,7 +306,7 @@ def train_clf(model_config, train_config, data_config, image_config):
 	train_set = ImageLoader(data_config['data_path'], data_config['training_files'], image_config['input_size'])
 	valset = ImageLoader(data_config['data_path'], data_config['validation_files'], image_config['input_size'])
 	
-	train_loader = DataLoader(train_set, num_workers=0, shuffle=True, sampler=None, 
+	train_loader = DataLoader(train_set, num_workers=4, shuffle=True, sampler=None, 
 		batch_size=train_config['batch_size'], pin_memory=True, drop_last=True, collate_fn=torch.utils.data.dataloader.default_collate) 
 	 
 	return {'model':model, 
