@@ -7,6 +7,7 @@ from datetime import datetime
 import argparse
 from apex import amp
 import time
+import sklearn
 from contextlib import contextmanager
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
@@ -94,6 +95,8 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	"""
 	correct = 0
 	total = 0
+	all_pred = []
+	all_true = []
 	model.eval()
 	with torch.no_grad():
 		val_loader = DataLoader(valset, sampler=None, num_workers=0,
@@ -111,11 +114,15 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 			total += y.size(0)
 			correct += (predicted == y).sum().item()
 
+			all_pred.extend([predicted])
+			all_true.extend([y])
+
 		val_loss = val_loss / (i + 1)
 	
 	val_log_path = os.path.join(checkpoint_path,'log_validate.txt')
 	with open(val_log_path, 'a') as f:
 		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
+		f.write(confusion_matrix(all_true, all_pred))
 	print("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
 	
 	model.train()
@@ -206,7 +213,7 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 	
 	# get scheduler
 	scheduler = get_scheduler(optimizer, train_config, iterations)
-	lr = scheduler.get_lr()[0]
+	lr = scheduler.get_last_lr()
 
 	# train
 	for epoch in range(start_epochs, train_config['epochs']):
@@ -255,15 +262,15 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 			
 			iterations += 1
 			
-			
-		if epoch%train_config['epochs_per_checkpoint'] == train_config['epochs_per_checkpoint']-1:
-			save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
+		
+		# save at the end of epoch
+		save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
 			
 		# validating
 		validate(model, criterion, valset, epoch, train_config['checkpoint_path'], batch_to_gpu)
 		
 		if scheduler is not None:
-			lr = scheduler.get_lr()[0]
+			lr = scheduler.get_last_lr()
 			scheduler.step()
 				
 		summary_writer.add_scalar('Loss/train_epoch', train_epoch_avg_loss/iterations, epoch * len(train_loader) + i) 
@@ -326,6 +333,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	
 	torch.cuda.set_device("cuda:{}".format(args.device))
-	torch.backends.cudnn.benchmark = False
+	print(torch.cuda.is_available())
+	torch.backends.cudnn.benchmark = True
 	
 	main()

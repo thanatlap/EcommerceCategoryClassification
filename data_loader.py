@@ -24,9 +24,9 @@ class ImageLoader(torch.utils.data.Dataset):
 		self.datadir = datadir
 		self.input_size = input_size
 		self.transforms = transforms.Compose([
-							# transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 							transforms.RandomResizedCrop(input_size),
-							transforms.ToTensor()
+							transforms.ToTensor(),
+							# transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 							])
 
 	def __getitem__(self, index):

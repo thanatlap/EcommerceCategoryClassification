@@ -13,7 +13,7 @@ def set_parameter_requires_grad(model, feature_extracting):
 
 class Clf_model(nn.Module):
 
-	def __init__(self, n_class, use_pretrained=True, feature_extract=True):
+	def __init__(self, n_class, use_pretrained, feature_extract):
 		super(Clf_model, self).__init__()
 		self.backbone = models.resnet34(pretrained=use_pretrained)
 		set_parameter_requires_grad(self.backbone, feature_extract)
