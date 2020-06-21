@@ -7,12 +7,14 @@ from datetime import datetime
 import argparse
 from apex import amp
 import time
-import sklearn
+from sklearn.metrics import confusion_matrix
 from contextlib import contextmanager
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
+import numpy as np
 
 from model import Clf_model
 from data_loader import ImageLoader, batch_to_gpu
@@ -105,7 +107,7 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 								pin_memory=True, collate_fn=torch.utils.data.dataloader.default_collate)
 
 		val_loss = 0.0
-		for i, batch in enumerate(val_loader):
+		for i, batch in enumerate(tqdm(val_loader)):
 			x, y = batch_to_gpu(batch)
 			y_pred = model(x)
 			loss = criterion(y_pred, y)
@@ -115,8 +117,8 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 			total += y.size(0)
 			correct += (predicted == y).sum().item()
 
-			total_pred.extend(predicted)
-			total_actual.extend(y)
+			total_pred.extend(predicted.cpu().numpy())
+			total_actual.extend(y.data.cpu().numpy())
 
 			# print("[INFO] Top-1 Acc by batch {}".format(100*correct/total))
 
@@ -125,7 +127,7 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	val_log_path = os.path.join(checkpoint_path,'log_validate.txt')
 	with open(val_log_path, 'a') as f:
 		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
-		f.write(sklearn.metrics.confusion_matrix(total_actual, total_pred, labels=np.arange(42)))
+		f.write(np.array2string(confusion_matrix(total_actual, total_pred, labels=np.arange(42)), separator=', '))
 	print("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
 	
 	model.train()
