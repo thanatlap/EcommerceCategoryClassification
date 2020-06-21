@@ -1,0 +1,4 @@
+*/tensorboard/*
+weights/*
+*pyc
+*__pycache__*
