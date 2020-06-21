@@ -320,8 +320,8 @@ def train_clf(model_config, train_config, data_config, image_config):
 	criterion = torch.nn.CrossEntropyLoss()
 	
 	# dataloader    
-	train_set = ImageLoader(data_config['data_path'], data_config['training_files'], image_config['input_size'])
-	valset = ImageLoader(data_config['data_path'], data_config['validation_files'], image_config['input_size'])
+	train_set = ImageLoader(data_config['data_path'], data_config['training_files'], image_config['input_size'], is_training=True)
+	valset = ImageLoader(data_config['data_path'], data_config['validation_files'], image_config['input_size'], is_training=False)
 	
 	train_loader = DataLoader(train_set, num_workers=4, shuffle=True, sampler=None, 
 		batch_size=train_config['batch_size'], pin_memory=True, drop_last=True, collate_fn=torch.utils.data.dataloader.default_collate) 

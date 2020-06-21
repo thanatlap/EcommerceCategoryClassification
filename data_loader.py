@@ -18,16 +18,29 @@ def load_datapath_from_csv(datapath, datafile):
 
 class ImageLoader(torch.utils.data.Dataset):
 
-	def __init__(self, datadir, datafile, input_size=None):
+	def __init__(self, datadir, datafile, input_size, is_training=False):
 		
 		self.datapath = load_datapath_from_csv(datadir,datafile)
 		self.datadir = datadir
 		self.input_size = input_size
-		self.transforms = transforms.Compose([
-							transforms.RandomResizedCrop(input_size),
-							transforms.ToTensor(),
-							# transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-							])
+
+		if is_training:
+			self.transforms = transforms.Compose([
+								transforms.RandomResizedCrop(input_size),
+								transforms.Grayscale(3),
+								transforms.RandomAffine(120),
+								transforms.RandomHorizontalFlip(p=0.25),
+								transforms.RandomVerticalFlip(p=0.25),
+								transforms.RandomErasing(p=0.25)
+								transforms.ToTensor(),
+								transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+								])
+		else:
+			self.transforms = transforms.Compose([
+								transforms.Resize(input_size),
+								transforms.ToTensor(),
+								transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+								])
 
 	def __getitem__(self, index):
 

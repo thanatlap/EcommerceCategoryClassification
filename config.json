@@ -8,7 +8,7 @@
 ,"train_config":{
     "epochs":1000,
     "iterations_per_checkpoint":200,
-    "checkpoint_path":"weights/resnet34_pretrain",
+    "checkpoint_path":"weights/resnet152_pretrain_aug",
     "checkpoint_filename":"model.pt",
     "tensorboard_dir":"tensorboard",
     "amp_run":false,
