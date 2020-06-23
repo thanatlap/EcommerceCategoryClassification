@@ -6,16 +6,16 @@
     }
 
 ,"train_config":{
-    "epochs":1000,
+    "epochs":100,
     "iterations_per_checkpoint":200,
-    "checkpoint_path":"weights/resnet152_pretrain_aug",
+    "checkpoint_path":"weights/resnet34_pretrain_subset",
     "checkpoint_filename":"model.pt",
     "tensorboard_dir":"tensorboard",
     "amp_run":false,
     "learning_rate":1e-3,
     "weight_decay":1e-6,
     "grad_clip_thresh":1,
-    "batch_size":128,
+    "batch_size":256,
     "grad_clip":5,
     "opts":"adam",
     "sgd_momentum":0.9,
@@ -27,8 +27,8 @@
 
 ,"data_config":{
     "data_path":"D:\\ShoppeeChallenge_1_data",
-    "training_files":"train_train.csv",
-    "validation_files":"train_val.csv"
+    "training_files":"train_subtrain.csv",
+    "validation_files":"train_subval.csv"
     }
     
     
