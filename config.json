@@ -6,7 +6,7 @@
     }
 
 ,"train_config":{
-    "epochs":100,
+    "epochs":150,
     "iterations_per_checkpoint":200,
     "checkpoint_path":"weights/resnet34_pretrain_subset",
     "checkpoint_filename":"model.pt",
@@ -22,7 +22,7 @@
     "sgd_nesterov":true,
     "lr_policy": "step",
     "gamma": 0.9,
-    "epoch_step_size": 5
+    "epoch_step_size": 20
 }
 
 ,"data_config":{
