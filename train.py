@@ -2,7 +2,7 @@ from __future__ import print_function
 from __future__ import division
 import torch
 import json
-import os
+import os, sys
 from datetime import datetime
 import argparse
 from apex import amp
@@ -18,6 +18,8 @@ import numpy as np
 
 from model import Clf_model
 from data_loader import ImageLoader, batch_to_gpu
+
+np.set_printoptions(threshold=sys.maxsize)
 
 def load_checkpoint(checkpoint_path, model, optimizer):
 	""" Load model checkpoint
@@ -83,7 +85,7 @@ def evaluating(model):
 			model.train()
 			
 			
-def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
+def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu, n_class):
 	"""Model validation function
 	----------------------------------------------------
 	INPUTS:
@@ -127,7 +129,8 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu):
 	val_log_path = os.path.join(checkpoint_path,'log_validate.txt')
 	with open(val_log_path, 'a') as f:
 		f.write("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
-		f.write(np.array2string(confusion_matrix(total_actual, total_pred, labels=np.arange(42)), separator=', '))
+		f.write(np.array2string(confusion_matrix(total_actual, total_pred, labels=np.arange(n_class)), separator=', '))
+		f.write('\n')
 	print("[INFO] {} Log Validation Result Epoch {} Validation loss {:9f} Top-1 Acc {}\n".format(datetime.now(), epochs, val_loss, 100*correct/total))
 	
 	model.train()
@@ -181,7 +184,7 @@ def get_scheduler(optimizer, train_config, iterations=-1):
 	return scheduler
 
 			
-def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
+def train(model, criterion, train_loader, batch_to_gpu, train_config, valset, n_class):
 	""" Main function for training the model
 	----------------------------------------------------
 	INPUTS:
@@ -285,7 +288,7 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset):
 			save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
 			
 		# validating
-		validate(model, criterion, valset, epoch, train_config['checkpoint_path'], batch_to_gpu)
+		validate(model, criterion, valset, epoch, train_config['checkpoint_path'], batch_to_gpu, n_class)
 		
 		if scheduler is not None:
 			lr = scheduler.get_last_lr()
@@ -342,7 +345,7 @@ def main():
 		config = json.load(f)
 
 	prep_train = train_clf(**config)
-	train(**prep_train)
+	train(n_class=config['model_config']['n_class'], **prep_train)
 
 
 if __name__ == '__main__':
