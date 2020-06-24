@@ -52,8 +52,9 @@ class ImageLoader(torch.utils.data.Dataset):
 
 		image = Image.open(img_file).convert("RGB")
 
-		image = self.transforms(image)
 		image = image/255 # scale
+		image = self.transforms(image)
+		
 
 		return (image, img_class)
 

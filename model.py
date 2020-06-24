@@ -15,7 +15,7 @@ class Clf_model(nn.Module):
 
 	def __init__(self, n_class, use_pretrained, feature_extract):
 		super(Clf_model, self).__init__()
-		self.backbone = models.resnet34(pretrained=use_pretrained)
+		self.backbone = models.resnet152(pretrained=use_pretrained)
 		set_parameter_requires_grad(self.backbone, feature_extract)
 		num_ftrs = self.backbone.fc.in_features
 		self.backbone.fc = nn.Linear(num_ftrs, 512)
