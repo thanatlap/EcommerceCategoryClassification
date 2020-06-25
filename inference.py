@@ -100,16 +100,21 @@ def inference(model, data_loader):
 			_, predicted = torch.max(y_pred.data, 1)
 			total_pred.extend(predicted.cpu().numpy())
 
+
 	data = pd.read_csv(os.path.join(DATA_DIR, TEST_FILE))
 	data = data.drop(['category'], axis=1)
-	data['category'] = np.array(total_pred)
-	data.to_csv('submission_temp.csv', index=None)
 
-	vfunc = np.vectorize(zero_leading_pad)
-	total_pred = vfunc(total_pred)
-	data = data.drop(['category'], axis=1)
-	data['category'] = np.array(total_pred)
-	data.to_csv('submission_{}.csv'.format(datetime.now().strftime("%Y%m%d_%H%M")), index=None)
+	try:
+		vfunc = np.vectorize(zero_leading_pad)
+		total_pred = vfunc(total_pred)
+		data['category'] = np.array(total_pred)
+		data.to_csv('submission_{}.csv'.format(datetime.now().strftime("%Y%m%d_%H%M")), index=None)
+		
+	except:
+		data['category'] = np.array(total_pred)
+		data.to_csv('submission_temp.csv', index=None)
+
+	
 
 
 def inference_clf(data_dir, test_file, input_size, model_config):
