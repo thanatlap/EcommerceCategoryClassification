@@ -25,10 +25,15 @@ from model import Clf_model
 np.set_printoptions(threshold=sys.maxsize)
 
 
-MODEL_WEIGHT = 'weights/resnet152_pretrain_aug_tune2/model.pt'
+MODEL_WEIGHT = 'weights/resnet152_pretrain_tune4/model.pt'
 DATA_DIR = "D:\\ShoppeeChallenge_1_data"
 TEST_FILE = "test.csv"
 
+def zero_leading_pad(value):
+    try:
+        return '{0:0>2}'.format(int(value))
+    except:
+        return value
 
 
 class ImageLoader(torch.utils.data.Dataset):
@@ -54,7 +59,6 @@ class ImageLoader(torch.utils.data.Dataset):
 
 		image = Image.open(img_file).convert("RGB")
 
-		image = image/255 # scale
 		image = self.transforms(image)
 		
 
@@ -99,7 +103,13 @@ def inference(model, data_loader):
 	data = pd.read_csv(os.path.join(DATA_DIR, TEST_FILE))
 	data = data.drop(['category'], axis=1)
 	data['category'] = np.array(total_pred)
-	data.to_csv('submission.csv')
+	data.to_csv('submission_temp.csv', index=None)
+
+	vfunc = np.vectorize(zero_leading_pad)
+	total_pred = vfunc(total_pred)
+	data = data.drop(['category'], axis=1)
+	data['category'] = np.array(total_pred)
+	data.to_csv('submission_{}.csv'.format(datetime.now().strftime("%Y%m%d_%H%M")), index=None)
 
 
 def inference_clf(data_dir, test_file, input_size, model_config):
@@ -110,7 +120,7 @@ def inference_clf(data_dir, test_file, input_size, model_config):
 	# dataloader    
 	pred_set = ImageLoader(data_dir, test_file, input_size)
 	data_loader = DataLoader(pred_set, num_workers=4, shuffle=False, sampler=None, 
-		batch_size=256, pin_memory=True, drop_last=False, collate_fn=torch.utils.data.dataloader.default_collate) 
+		batch_size=128, pin_memory=True, drop_last=False, collate_fn=torch.utils.data.dataloader.default_collate) 
 	 
 	return {'model':model, 
 			'data_loader':data_loader}
