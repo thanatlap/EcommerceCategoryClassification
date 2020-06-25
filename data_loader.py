@@ -28,12 +28,13 @@ class ImageLoader(torch.utils.data.Dataset):
 		if is_training:
 			self.transforms = transforms.Compose([
 								transforms.RandomResizedCrop(input_size),
+								transforms.ColorJitter(),
 								transforms.RandomGrayscale(0.2),
 								transforms.RandomHorizontalFlip(p=0.25),
 								transforms.RandomVerticalFlip(p=0.25),
 								transforms.ToTensor(),
 								transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-								transforms.RandomErasing(p=0.25)
+								transforms.RandomErasing(p=0.5, scale=(0.1, 0.4), ratio=(0.3, 3.3))
 								])
 		else:
 			self.transforms = transforms.Compose([
@@ -52,7 +53,6 @@ class ImageLoader(torch.utils.data.Dataset):
 
 		image = Image.open(img_file).convert("RGB")
 
-		image = image/255 # scale
 		image = self.transforms(image)
 		
 

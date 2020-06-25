@@ -2,13 +2,13 @@
 "model_config":{
     "n_class":42,
     "use_pretrained":true, 
-    "feature_extract":false
+    "feature_extract":true
     }
 
 ,"train_config":{
     "epochs":150,
     "iterations_per_checkpoint":200,
-    "checkpoint_path":"weights/resnet152_pretrain_tune3",
+    "checkpoint_path":"weights/wrn50_pretrain_tune5",
     "checkpoint_filename":"model.pt",
     "tensorboard_dir":"tensorboard",
     "amp_run":false,
@@ -22,13 +22,13 @@
     "sgd_nesterov":true,
     "lr_policy": "step",
     "gamma": 0.9,
-    "epoch_step_size": 20
+    "epoch_step_size": 5
 }
 
 ,"data_config":{
     "data_path":"D:\\ShoppeeChallenge_1_data",
-    "training_files":"train_subtrain.csv",
-    "validation_files":"train_subval.csv"
+    "training_files":"train_train.csv",
+    "validation_files":"train_val.csv"
     }
     
     

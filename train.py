@@ -105,7 +105,7 @@ def validate(model, criterion, valset, epochs, checkpoint_path, batch_to_gpu, n_
 	print('[INFO] Validating Model')
 	with torch.no_grad():
 		val_loader = DataLoader(valset, sampler=None, num_workers=4,
-								shuffle=False, batch_size=256,
+								shuffle=False, batch_size=128,
 								pin_memory=True, collate_fn=torch.utils.data.dataloader.default_collate)
 
 		val_loss = 0.0
