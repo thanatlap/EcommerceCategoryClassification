@@ -16,7 +16,8 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import numpy as np
 
-from model import Clf_model
+# from model import Clf_model, ClfStackModel
+from model import ClfStackModel
 from data_loader import ImageLoader, batch_to_gpu
 
 np.set_printoptions(threshold=sys.maxsize)
@@ -274,8 +275,8 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset, n_
 			avg_acc += acc
 			
 			if iterations%10 ==0:
-				print('[{}] {:1f}s, epoch: {}, step: {}, loss: {:5f}, lr: {:5f}, Top-1 Acc: {:3f}'.format(
-						datetime.now().strftime("%H:%M:%S"), iter_time, epoch, i, loss.item(), optimizer.param_groups[-1]['lr'], acc*100))
+				print('[{}] {:1f}s, epoch: {}, step: {}/{}, loss: {:5f}, lr: {:5f}, Top-1 Acc: {:3f}'.format(
+						datetime.now().strftime("%H:%M:%S"), iter_time, epoch, i, len(train_loader),loss.item(), optimizer.param_groups[-1]['lr'], acc*100))
 			
 			if iterations%train_config['iterations_per_checkpoint'] == train_config['iterations_per_checkpoint']-1:
 				save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)
@@ -322,7 +323,8 @@ def train_clf(model_config, train_config, data_config, image_config):
 	"""
 	
 	# load model
-	model = Clf_model(**model_config)
+	# model = Clf_model(**model_config)
+	model = ClfStackModel(model_config['n_class'])
 	criterion = torch.nn.CrossEntropyLoss()
 	
 	# dataloader    
