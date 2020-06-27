@@ -135,14 +135,14 @@ class ClfStackModel(nn.Module):
 		nn.init.xavier_uniform_(self.fc.weight)
 
 	def forward(self, x):
-		x1 = self.dense(x)
-		x1 = nn.functional.softmax(x1, dim=1).unsqueeze(1)
-		x2 = self.wrn(x)
-		x2 = nn.functional.softmax(x2, dim=1).unsqueeze(1)
-		x3 = self.resnex(x)
-		x3 = nn.functional.softmax(x3, dim=1).unsqueeze(1)
-		x4 = self.res(x)
-		x4 = nn.functional.softmax(x4, dim=1).unsqueeze(1)
+		x1 = self.dense(x).unsqueeze(1)
+		# x1 = nn.functional.softmax(x1, dim=1)
+		x2 = self.wrn(x).unsqueeze(1)
+		# x2 = nn.functional.softmax(x2, dim=1)
+		x3 = self.resnex(x).unsqueeze(1)
+		# x3 = nn.functional.softmax(x3, dim=1)
+		x4 = self.res(x).unsqueeze(1)
+		# x4 = nn.functional.softmax(x4, dim=1)
 
 		x = torch.cat([x1, x2, x3, x4], dim=1)
 		x = torch.reshape(x, (x.size()[0], -1))

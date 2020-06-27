@@ -8,7 +8,7 @@
 ,"train_config":{
     "epochs":20,
     "iterations_per_checkpoint":100,
-    "checkpoint_path":"weights/stack_model_tune2",
+    "checkpoint_path":"weights/stack_model_tune3",
     "checkpoint_filename":"model.pt",
     "tensorboard_dir":"tensorboard",
     "amp_run":false,
