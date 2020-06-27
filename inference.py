@@ -25,7 +25,7 @@ from model import Clf_model
 np.set_printoptions(threshold=sys.maxsize)
 
 
-MODEL_WEIGHT = 'weights/resnet152_pretrain_tune4/model.pt'
+MODEL_WEIGHT = 'weights/wrn50_pretrain_tune6/model.pt'
 DATA_DIR = "D:\\ShoppeeChallenge_1_data"
 TEST_FILE = "test.csv"
 
@@ -33,7 +33,7 @@ def zero_leading_pad(value):
     try:
         return '{0:0>2}'.format(int(value))
     except:
-        return value
+        return '{}'.format(value)
 
 
 class ImageLoader(torch.utils.data.Dataset):
@@ -104,15 +104,11 @@ def inference(model, data_loader):
 	data = pd.read_csv(os.path.join(DATA_DIR, TEST_FILE))
 	data = data.drop(['category'], axis=1)
 
-	try:
-		vfunc = np.vectorize(zero_leading_pad)
-		total_pred = vfunc(total_pred)
-		data['category'] = np.array(total_pred)
-		data.to_csv('submission_{}.csv'.format(datetime.now().strftime("%Y%m%d_%H%M")), index=None)
-		
-	except:
-		data['category'] = np.array(total_pred)
-		data.to_csv('submission_temp.csv', index=None)
+	vfunc = np.vectorize(zero_leading_pad)
+	total_pred = vfunc(total_pred)
+	data['category'] = np.array(total_pred)
+	data.to_csv('submission_{}.csv'.format(datetime.now().strftime("%Y%m%d_%H%M")), index=None)
+
 
 	
 

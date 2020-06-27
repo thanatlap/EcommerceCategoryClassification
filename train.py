@@ -273,8 +273,9 @@ def train(model, criterion, train_loader, batch_to_gpu, train_config, valset, n_
 			acc = correct/total
 			avg_acc += acc
 			
-			print('[{}] {:1f}s, epoch: {}, step: {}, loss: {:5f}, lr: {:5f}, Top-1 Acc: {:3f}'.format(
-					datetime.now().strftime("%H:%M:%S"), iter_time, epoch, i, loss.item(), optimizer.param_groups[-1]['lr'], acc*100))
+			if iterations%10 ==0:
+				print('[{}] {:1f}s, epoch: {}, step: {}, loss: {:5f}, lr: {:5f}, Top-1 Acc: {:3f}'.format(
+						datetime.now().strftime("%H:%M:%S"), iter_time, epoch, i, loss.item(), optimizer.param_groups[-1]['lr'], acc*100))
 			
 			if iterations%train_config['iterations_per_checkpoint'] == train_config['iterations_per_checkpoint']-1:
 				save_checkpoint(model, optimizer, epoch, iterations, checkpoint_filepath)

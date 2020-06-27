@@ -27,9 +27,10 @@ class ImageLoader(torch.utils.data.Dataset):
 
 		if is_training:
 			self.transforms = transforms.Compose([
-								transforms.RandomResizedCrop(input_size),
+								transforms.RandomResizedCrop(input_size, scale=(0.6, 1.0)),
+								# transforms.Resize([input_size,input_size]),
 								transforms.ColorJitter(),
-								transforms.RandomGrayscale(0.2),
+								transforms.RandomGrayscale(0.25),
 								transforms.RandomHorizontalFlip(p=0.25),
 								transforms.RandomVerticalFlip(p=0.25),
 								transforms.ToTensor(),
