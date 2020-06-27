@@ -131,14 +131,8 @@ class ClfStackModel(nn.Module):
 		set_parameter_requires_grad(self.resnex, True)
 		set_parameter_requires_grad(self.res, True)
 
-		self.fc1 = nn.Linear(int(n_class*4), 64)
-		self.bn1 = nn.BatchNorm1d(64)
-		self.fc2 = nn.Linear(64, n_class)
-
-		nn.init.kaiming_normal_(self.fc1.weight, mode='fan_out', nonlinearity='relu')
-		nn.init.xavier_uniform_(self.fc2.weight)
-		nn.init.constant_(self.bn1.weight, 1)
-		nn.init.constant_(self.bn1.bias, 0)
+		self.fc = nn.Linear(int(n_class*4), n_class)
+		nn.init.xavier_uniform_(self.fc.weight)
 
 	def forward(self, x):
 		x1 = self.dense(x)
@@ -152,11 +146,7 @@ class ClfStackModel(nn.Module):
 
 		x = torch.cat([x1, x2, x3, x4], dim=1)
 		x = torch.reshape(x, (x.size()[0], -1))
-		x = self.fc1(x)
-		x = self.bn1(x)
-		# x = nn.functional.relu(x)
-		x = x* torch.tanh(F.softplus(x))
-		x = self.fc2(x)
+		x = self.fc(x)
 		return x
 
 

@@ -7,15 +7,15 @@
 
 ,"train_config":{
     "epochs":20,
-    "iterations_per_checkpoint":200,
-    "checkpoint_path":"weights/stack_model",
+    "iterations_per_checkpoint":100,
+    "checkpoint_path":"weights/stack_model_tune2",
     "checkpoint_filename":"model.pt",
     "tensorboard_dir":"tensorboard",
     "amp_run":false,
     "learning_rate":1e-3,
     "weight_decay":1e-6,
     "grad_clip_thresh":1,
-    "batch_size":32,
+    "batch_size":128,
     "grad_clip":5,
     "opts":"adam",
     "sgd_momentum":0.9,
